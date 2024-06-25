@@ -1,9 +1,12 @@
 package ch.makery.address.view
+
 import ch.makery.address.model.Person
 import ch.makery.address.MainApp
-import scalafx.scene.control.{TableView, TableColumn, Label}
+import ch.makery.address.util.DateUtil._
+import scalafx.scene.control.{Label, TableColumn, TableView}
 import scalafxml.core.macros.sfxml
-import scalafx.beans.property.{StringProperty}
+import scalafx.beans.property.StringProperty
+import scalafx.Includes._
 
 @sfxml
 class PersonOverviewController(
@@ -22,6 +25,7 @@ class PersonOverviewController(
   // initialize columns's cell values
   firstNameColumn.cellValueFactory = {_.value.firstName}
   lastNameColumn.cellValueFactory  = {_.value.lastName}
+
   private def showPersonDetails (person : Option[Person]) = {
     person match {
       case Some(person) =>
@@ -31,9 +35,15 @@ class PersonOverviewController(
         streetLabel.text    <== person.street
         cityLabel.text      <== person.city;
         postalCodeLabel.text = person.postalCode.value.toString
+        birthdayLabel.text   = person.date.value.asString
 
       case None =>
         // Person is null, remove all the text.
+        firstNameLabel.text.unbind()
+        lastNameLabel.text.unbind()
+        streetLabel.text.unbind()
+        cityLabel.text.unbind()
+
         firstNameLabel.text = ""
         lastNameLabel.text  = ""
         streetLabel.text    = ""
@@ -43,6 +53,9 @@ class PersonOverviewController(
     }
   }
 
+  showPersonDetails(None)
 
-
+  personTable.selectionModel().selectedItem.onChange((a, b, c) => {
+    showPersonDetails(Option(c))
+  })
 }
