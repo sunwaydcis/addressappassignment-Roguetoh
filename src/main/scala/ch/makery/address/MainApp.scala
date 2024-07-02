@@ -1,5 +1,6 @@
 package ch.makery.address
 import ch.makery.address.model.Person
+import ch.makery.address.view.PersonEditDialogController
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
@@ -8,6 +9,7 @@ import scalafxml.core.{FXMLLoader, FXMLView, NoDependencyResolver}
 import javafx.{scene => jfxs}
 import scalafx.beans.property.StringProperty
 import scalafx.collections.ObservableBuffer
+import scalafx.stage.{Modality, Stage}
 
 object MainApp extends JFXApp {
   val personData = new ObservableBuffer[Person]()
@@ -59,17 +61,24 @@ object MainApp extends JFXApp {
   //showPersonOverview()
   showWelcome()
 
-  implicit val intDefault: Int = 4
-  def multiply(a: Int)(implicit by: Int): Int = a * by
+  def showPersonEditDialog(person: Person): Boolean = {
+    val resource = getClass.getResourceAsStream("view/PersonEditDialog.fxml")
+    val loader = new FXMLLoader(null, NoDependencyResolver)
+    loader.load(resource);
+    val roots2  = loader.getRoot[jfxs.Parent]
+    val control = loader.getController[PersonEditDialogController#Controller]
 
-  println(multiply(2))
-
-  implicit class Square(val length: Int){
-    def area = length * length
+    val dialog = new Stage() {
+      initModality(Modality.ApplicationModal)
+      initOwner(stage)
+      scene = new Scene {
+        root = roots2
+      }
+    }
+    control.dialogStage = dialog
+    control.person = person
+    dialog.showAndWait()
+    control.okClicked
   }
 
-  def displaySquare(square: Square): Unit ={
-    println("The area of square is " + square.area)
-  }
-  displaySquare(new Square(65))
 }
